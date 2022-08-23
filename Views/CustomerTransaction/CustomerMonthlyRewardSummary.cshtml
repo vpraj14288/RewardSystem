@@ -1,0 +1,81 @@
+﻿@model dynamic
+
+@{
+    ViewData["Title"] = "Customer Transaction by Month";
+}
+
+@if (TempData["ResultOk"] != null)
+{
+    <h1 class="alert-success">@TempData["ResultOk"]</h1>
+}
+
+<div class="container shadow p-5">
+
+    <h1 class="text-center mb-3">Customer Transactions by Month </h1>
+    
+    
+    @{
+        IEnumerable<CustomerTransaction> customerTransactions = null;
+        IEnumerable<Customer> customers = null;
+
+        if (ViewData["CustomerTransactions"] != null)
+        {
+            customerTransactions = ViewData["CustomerTransactions"] as IEnumerable<CustomerTransaction>;
+        }
+        if (ViewData["Customers"] != null) 
+        {
+            customers = ViewData["Customers"] as IEnumerable<Customer>;
+        }
+    }
+    
+        
+        @if (customerTransactions != null && customers != null)
+        {
+            var custTrans = from trans in customerTransactions
+                                       join cust in customers on trans.CustomerId equals cust.CustomerId
+                                       select new
+                                       {
+                                           CustomerName = cust.UserName,
+                                           TransactionCode = trans.TransactionCode,
+                                           TransactionDatetime = trans.TransactionDatetime,
+                                           TransactionAmount = trans.TransactionAmount,
+                                           TransactionReward = trans.TransactionReward
+                                       };
+
+            <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Transaction Datetime</th>
+                    <th>Transacion Amount</th>
+                    <th>Transaction Reward</th>
+                </tr>
+            </thead>
+            @foreach (var group in custTrans.GroupBy(item => item.CustomerName))
+            {
+                    <thead>
+                        <tr>
+                        
+                            <th>
+                            Customer Name: @Html.Encode(group.Key)
+                            </th>
+                        
+                        </tr>
+                    </thead>
+                    <tbody>    
+
+                        @foreach (var item in group) {
+                            <tr>
+                            <td> @Html.Encode(item.TransactionDatetime) </td>
+                            <td> @Html.Encode(item.TransactionAmount) </td>
+                            <td> @Html.Encode(item.TransactionReward) </td>
+                            </tr>
+                        }
+
+                </tbody>
+            }
+            </table>
+        }
+    
+    
+    
+</div>
